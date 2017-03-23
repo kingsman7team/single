@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
         if(v == btn1){
+            // test
             Map<String,String> params = new HashMap<String,String>();
             params.put("TYPE", "respond_test1");
             params.put("title","title message");
