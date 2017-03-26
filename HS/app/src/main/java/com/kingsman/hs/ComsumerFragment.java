@@ -46,7 +46,7 @@ import java.util.List;
  * {@link ComsumerFragment.OnComsumerFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link ComsumerFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * create an instance of this fragment by Haemdam
  */
 public class ComsumerFragment extends Fragment implements Switch.OnCheckedChangeListener{
     private static final String TAG = ComsumerFragment.class.getName();
