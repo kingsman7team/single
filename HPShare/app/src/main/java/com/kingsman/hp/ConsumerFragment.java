@@ -120,7 +120,7 @@ public class ConsumerFragment extends Fragment implements Switch.OnCheckedChange
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comsumer, container, false);
+        return inflater.inflate(R.layout.fragment_consumer, container, false);
     }
 
     @Override
