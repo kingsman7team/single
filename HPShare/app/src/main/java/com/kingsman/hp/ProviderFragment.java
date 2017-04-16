@@ -72,23 +72,8 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_provider, container, false);
-/*        View view = inflater.inflate(R.layout.provider_fragment_item_list, container, false);
-
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new RecyclerViewAdapter(getContext()));
-        }
-        return view;*/
     }
 
     protected static final int SPINNER_RID_TERM = R.id.spinner_select_date;
