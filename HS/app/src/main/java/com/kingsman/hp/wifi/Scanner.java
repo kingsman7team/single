@@ -1,4 +1,4 @@
-package com.kingsman.hs.wifi;
+package com.kingsman.hp.wifi;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.kingsman.hs.R;
+import com.kingsman.hp.R;
 
 /**
  * Created by HaeDam on 2017-03-05.

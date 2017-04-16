@@ -1,4 +1,4 @@
-package com.kingsman.hs;
+package com.kingsman.hp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

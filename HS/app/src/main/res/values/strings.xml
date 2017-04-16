@@ -1,8 +1,8 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">HS</string>
     <string name="title_activity_hs">HSActivity</string>
     <string name="title_provider">Provider</string>
-    <string name="title_comsumer">Comsumer</string>
+    <string name="title_consumer">Consumer</string>
 
 
     <!-- WIFI -->
@@ -16,6 +16,15 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!--    Permissions    -->
+    <string name="permission_rationale"><xliff:g id="permission">%1$s</xliff:g> permission is required for work well this app.</string>
+    <string name="permission_denied">This App requires <xliff:g id="permission">%1$s</xliff:g> permission. Please try again and grant access to use the <xliff:g id="permission">%2$s</xliff:g>, it can be enabled from the System Settings &gt; Apps &gt;.</string>
+    <string name="permission_required_toast">Permission is required for this app.</string>
+
+
+    <!-- Consumer option menu -->
+    <string name="user_map">AP User viewer</string>
+    
     <!-- povider fragment -->
     <string name="provider_ap_settings">AP Settings</string>
     <string name="provider_data_per">제공 주기</string>

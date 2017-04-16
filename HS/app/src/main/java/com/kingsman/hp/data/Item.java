@@ -1,4 +1,4 @@
-package com.kingsman.hs.data;
+package com.kingsman.hp.data;
 
 /**
  * Created by Haedam on 2017-03-05.
@@ -6,7 +6,7 @@ package com.kingsman.hs.data;
 
 import android.widget.ImageView;
 
-import com.kingsman.hs.ap.AccessPoint;
+import com.kingsman.hp.ap.AccessPoint;
 
 public class Item {
 

@@ -1,4 +1,4 @@
-package com.kingsman.hs.ap;
+package com.kingsman.hp.ap;
 
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;

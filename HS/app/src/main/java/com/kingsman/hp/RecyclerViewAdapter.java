@@ -1,4 +1,4 @@
-package com.kingsman.hs;
+package com.kingsman.hp;
 
 import android.content.Context;
 import android.net.wifi.ScanResult;
@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.kingsman.hs.ap.AccessPoint;
+import com.kingsman.hp.ap.AccessPoint;
 
 import java.util.ArrayList;
 import java.util.List;

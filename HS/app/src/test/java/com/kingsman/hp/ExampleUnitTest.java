@@ -1,4 +1,4 @@
-package com.kingsman.hs;
+package com.kingsman.hp;
 
 import org.junit.Test;
 

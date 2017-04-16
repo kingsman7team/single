@@ -1,4 +1,4 @@
-package com.kingsman.hs.service;
+package com.kingsman.hp.service;
 
 import android.app.Service;
 import android.content.Intent;
