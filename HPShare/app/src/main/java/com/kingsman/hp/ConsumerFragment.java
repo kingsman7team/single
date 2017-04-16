@@ -1,4 +1,4 @@
-package com.kingsman.hs;
+package com.kingsman.hp;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -14,24 +14,22 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.kingsman.hs.ap.AccessPoint;
-import com.kingsman.hs.ap.WifiApManager;
-import com.kingsman.hs.wifi.Scanner;
+import com.kingsman.hp.ap.AccessPoint;
+import com.kingsman.hp.ap.WifiApManager;
+import com.kingsman.hp.wifi.Scanner;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,13 +41,13 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ComsumerFragment.OnComsumerFragmentInteractionListener} interface
+ * {@link ConsumerFragment.OnComsumerFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ComsumerFragment#newInstance} factory method to
+ * Use the {@link ConsumerFragment#newInstance} factory method to
  * create an instance of this fragment by Haemdam
  */
-public class ComsumerFragment extends Fragment implements Switch.OnCheckedChangeListener{
-    private static final String TAG = ComsumerFragment.class.getName();
+public class ConsumerFragment extends Fragment implements Switch.OnCheckedChangeListener{
+    private static final String TAG = ConsumerFragment.class.getName();
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -74,7 +72,7 @@ public class ComsumerFragment extends Fragment implements Switch.OnCheckedChange
     private RecyclerViewAdapter mRecyclerViewAdapter;
     private LinearLayoutManager mLayoutManager;
 
-    public ComsumerFragment() {
+    public ConsumerFragment() {
         // Required empty public constructor
     }
 
@@ -84,11 +82,11 @@ public class ComsumerFragment extends Fragment implements Switch.OnCheckedChange
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment ComsumerFragment.
+     * @return A new instance of fragment ConsumerFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ComsumerFragment newInstance(String param1, String param2) {
-        ComsumerFragment fragment = new ComsumerFragment();
+    public static ConsumerFragment newInstance(String param1, String param2) {
+        ConsumerFragment fragment = new ConsumerFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -115,7 +113,7 @@ public class ComsumerFragment extends Fragment implements Switch.OnCheckedChange
             mScanner = new Scanner(getContext());
         }
 
-
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -189,6 +187,25 @@ public class ComsumerFragment extends Fragment implements Switch.OnCheckedChange
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.consummer_option_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.user_map:
+                Toast.makeText(getContext(), "select", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent();
+                intent.setClassName(getContext(), UserMapActivity.class.getName());
+                startActivity(intent);
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
