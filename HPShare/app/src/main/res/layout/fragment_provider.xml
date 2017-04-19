@@ -22,6 +22,16 @@ tools:context="com.kingsman.hp.ProviderFragment">
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/provider_ap_settings"/>
+        <Button
+            android:id="@+id/provider_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/provider_start"/>
+        <Button
+            android:id="@+id/provider_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/provider_stop"/>
 
         <TextView
             android:layout_width="match_parent"

@@ -27,7 +27,10 @@
     
     <!-- povider fragment -->
     <string name="provider_ap_settings">AP Settings</string>
-    <string name="provider_data_per">제공 주기</string>
+    <string name="provider_start">Start</string>
+    <string name="provider_stop">Stop</string>
+    <string name="provider_data_per">Date Term</string>
+
     <string-array name="select_date">
         <item>Daily</item>
         <item>Weekly</item>
@@ -40,7 +43,7 @@
         <item>2048</item>
     </string-array>
 
-    <string name="provider_remain_data">남은 데이터</string>
-    <string name="provider_offered_data">제공한 데이터</string>
-    <string name="provider_total_offered_title">총 제공 데이터</string>
+    <string name="provider_remain_data">Remain Data</string>
+    <string name="provider_offered_data">Used Data</string>
+    <string name="provider_total_offered_title">Total Used Data</string>
 </resources>

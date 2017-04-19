@@ -1,8 +1,12 @@
 package com.kingsman.hp;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.Formatter;
@@ -11,8 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.kingsman.hp.service.DataCheckingService;
 
 /**
  * A fragment representing a list of Items.
@@ -20,7 +27,7 @@ import android.widget.TextView;
  * Activities containing this fragment MUST implement the {@link OnProviderFragmentInteractionListener}
  * interface.
  */
-public class ProviderFragment extends Fragment implements AdapterView.OnItemSelectedListener {
+public class ProviderFragment extends Fragment implements AdapterView.OnItemSelectedListener, View.OnClickListener {
     private static final String SHARED_PREFERENCE_NAME = "preference";
     private final String SP_SpinnerIndex_term = "index_term";
     private final String SP_SpinnerIndex_data = "index_data";
@@ -38,10 +45,14 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     private long offeredDataAmount;
     private long remainDataAmount;
     private long offeredTotalDataAmount;
+    private long mLimitAmount;
 
     private TextView offeredData;
     private TextView remainData;
     private TextView offeredTotalData;
+    private Button btn_ApSetting;
+    private Button btn_Start;
+    private Button btn_Stop;
 
     private SharedPreferences mPref;
 
@@ -69,6 +80,7 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+        startServiceMethod();
     }
 
     @Override
@@ -96,6 +108,10 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         remainData = (TextView)view.findViewById(R.id.provider_remain_data_amount);
         offeredTotalData = (TextView)view.findViewById(R.id.provider_total_offered_amount);
 
+        btn_Start = (Button)view.findViewById(R.id.provider_start);
+        btn_Start.setOnClickListener(this);
+        btn_Stop = (Button)view.findViewById(R.id.provider_stop);
+        btn_Stop.setOnClickListener(this);
         updateUI();
     }
 
@@ -111,11 +127,19 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         if(mSpinnerIndex_data >= getResources().getStringArray(R.array.data_per_term).length){
             mSpinnerIndex_term = 0;
         }
+        mLimitAmount = getLimitAmount();
 
         // need to change to get info from server
         offeredDataAmount = mPref.getLong(SP_AOMUNT_offeredData, 0L);
         //remainDataAmount = mPref.getInt(SP_AOMUNT_remainData, 0);
         offeredTotalDataAmount = mPref.getLong(SP_AOMUNT_offeredTotalData, 0L);
+
+        if(mLimitAmount <= offeredDataAmount){
+            remainDataAmount = 0L;
+        }
+        else {
+            remainDataAmount = mLimitAmount - offeredDataAmount;
+        }
     }
 
     @Override
@@ -156,9 +180,7 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         Log.d("aa", "Nothing!");
     }
 
-    private void updateDataUsageInfo(){
-        //Log.d("aa", "updateDataUsageInfo mSpinnerIndex_data : " + mSpinnerIndex_data);
-
+    private long getLimitAmount(){
         long limitAmount;
         try {
             limitAmount =
@@ -170,15 +192,17 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
             limitAmount = 0L;
         }
 
-        offeredDataAmount = getCurOfferedData(); // need to change
-        offeredTotalDataAmount += offeredDataAmount; // need to change
+        return limitAmount;
+    }
 
-        if(limitAmount <= offeredDataAmount){
+    private void updateDataUsageInfo(){
+        mLimitAmount = getLimitAmount();
+        if(mLimitAmount <= offeredDataAmount){
             remainDataAmount = 0L;
             //stopOfferData();
         }
         else
-            remainDataAmount = limitAmount - offeredDataAmount;
+            remainDataAmount = mLimitAmount - offeredDataAmount;
 
         mPref = getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = mPref.edit();
@@ -195,8 +219,21 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         offeredTotalData.setText(Formatter.formatFileSize(getContext(), offeredTotalDataAmount));
     }
 
-    private long getCurOfferedData(){
-        return 0L;
+//    private long getCurOfferedData(){
+//        return 0L;
+//    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.provider_start){
+            //startServiceMethod();
+            Intent intent = new Intent(getContext(), DataCheckingService.class);
+            getActivity().startService(intent);
+        }
+        else if(v.getId() == R.id.provider_stop){
+            Intent intent = new Intent(getContext(), DataCheckingService.class);
+            getActivity().stopService(intent);
+        }
     }
 
     /**
@@ -212,5 +249,57 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     public interface OnProviderFragmentInteractionListener {
         // TODO: Update argument type and name
         void onProviderListFragmentInteraction();
+    }
+
+
+    // service
+    private DataCheckingService mService;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            DataCheckingService.DataServiceBinder binder = (DataCheckingService.DataServiceBinder) service;
+            mService = binder.getService();
+            Log.d("aaa","onServiceConnected registerCallback");
+            mService.registerCallback(mCallback);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+    };
+
+    private DataCheckingService.ICallback mCallback = new DataCheckingService.ICallback() {
+        @Override
+        public void updateCurUsage(long curUsage) {
+            Log.d("aa", "updateCurUsage curUsage : " + curUsage);
+            //Toast.makeText(getContext(), "" + Formatter.formatFileSize(getContext(), curUsage), Toast.LENGTH_SHORT).show();
+            offeredTotalDataAmount += curUsage;//(curTotalUsage - offeredDataAmount);
+            offeredDataAmount += curUsage;
+            remainDataAmount = getLimitAmount() - offeredDataAmount;
+            updateUI();
+        }
+
+        @Override
+        public int getTermType() {
+            return mSpinnerIndex_term;
+        }
+
+        @Override
+        public int getLimitValue() {
+            return Integer.parseInt(getResources().getStringArray(R.array.data_per_term)[mSpinnerIndex_data]);
+        }
+
+        @Override
+        public int getOldOfferedValue() {
+            return (int)offeredDataAmount;
+        }
+
+
+    };
+
+    private void startServiceMethod(){
+        Intent service = new Intent(getActivity(), DataCheckingService.class);
+        getActivity().bindService(service, mConnection, Context.BIND_AUTO_CREATE);
     }
 }
