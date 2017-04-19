@@ -227,11 +227,15 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     public void onClick(View v) {
         if(v.getId() == R.id.provider_start){
             //startServiceMethod();
-            Intent intent = new Intent(getContext(), DataCheckingService.class);
+            Intent intent = new Intent(getActivity(), DataCheckingService.class);
             getActivity().startService(intent);
         }
         else if(v.getId() == R.id.provider_stop){
-            Intent intent = new Intent(getContext(), DataCheckingService.class);
+            if(mService != null)
+                mService.stopChcecking();
+            if(mConnection != null)
+                getActivity().unbindService(mConnection);
+            Intent intent = new Intent(getActivity(), DataCheckingService.class);
             getActivity().stopService(intent);
         }
     }

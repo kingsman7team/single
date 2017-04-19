@@ -1,5 +1,6 @@
 package com.kingsman.hp.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -75,7 +76,10 @@ public class DataCheckingService extends Service {
     }
     public void stopChcecking(){
         isRunning = false;
-        mHandler.removeMessages(HANDLER_MESSAGE_CHECKING);
+        if(mHandler != null) {
+            mHandler.removeMessages(HANDLER_MESSAGE_CHECKING);
+            mHandler = null;
+        }
         if(this.mAppDataUsages != null) {
             this.mAppDataUsages.clear();
             this.mAppDataUsages = null;
@@ -141,6 +145,7 @@ public class DataCheckingService extends Service {
             @Override
             public void handleMessage(Message msg) {
 //                if(!isRunning){
+//                    //stopSelf();
 //                    return;
 //                }
                 if(msg.what == HANDLER_MESSAGE_CHECKING){
@@ -180,6 +185,7 @@ public class DataCheckingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        startForeground(1,new Notification());
         startService();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -194,15 +200,16 @@ public class DataCheckingService extends Service {
             public void run() {
                 Log.d("aaa", "Running start");
                 while (isRunning && mCurTotalValue < mLimitMB_Value){//mDefault_limit_value){
+                    Message msg = new Message();
+                    msg.what = HANDLER_MESSAGE_CHECKING;
+                    mHandler.sendMessage(msg);
                     try {
                         Thread.sleep(mCircular_time);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    Message msg = new Message();
-                    msg.what = HANDLER_MESSAGE_CHECKING;
-                    mHandler.sendMessage(msg);
                 }
+                //stopSelf();
                 Log.d("aaa", "Running over");
             }
         }).start();
@@ -214,7 +221,6 @@ public class DataCheckingService extends Service {
 
     @Override
     public void onDestroy() {
-        isRunning = false;
         super.onDestroy();
     }
 }
