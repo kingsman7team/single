@@ -1,4 +1,4 @@
-package com.kingsman.hp.data;
+package com.kingsman.hp.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

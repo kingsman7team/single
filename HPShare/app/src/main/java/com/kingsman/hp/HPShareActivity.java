@@ -22,8 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.kingsman.hp.data.SharePreferenceSettings;
 import com.kingsman.hp.utils.PermissionUtils;
+import com.kingsman.hp.utils.SharePreferenceSettings;
 
 public class HPShareActivity extends AppCompatActivity implements ConsumerFragment.OnComsumerFragmentInteractionListener {
 

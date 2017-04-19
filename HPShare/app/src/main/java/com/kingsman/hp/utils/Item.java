@@ -1,4 +1,4 @@
-package com.kingsman.hp.data;
+package com.kingsman.hp.utils;
 
 /**
  * Created by Haedam on 2017-03-05.
