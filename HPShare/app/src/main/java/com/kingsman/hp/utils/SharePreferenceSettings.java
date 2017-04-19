@@ -58,6 +58,12 @@ public class SharePreferenceSettings {
         doCommit();
     }
 
+    public void put(String key, long val) {
+        doEdit();
+        mEditor.putLong(key, val);
+        doCommit();
+    }
+
 
     public String getString(String key, String defaultValue) {
         return mPref.getString(key, defaultValue);
@@ -73,6 +79,14 @@ public class SharePreferenceSettings {
 
     public int getInt(String key, int defaultValue) {
         return mPref.getInt(key, defaultValue);
+    }
+
+    public long getLong(String key) {
+        return mPref.getLong(key, 0L);
+    }
+
+    public long getLong(String key, long defaultValue) {
+        return mPref.getLong(key, defaultValue);
     }
 
     private void doEdit() {

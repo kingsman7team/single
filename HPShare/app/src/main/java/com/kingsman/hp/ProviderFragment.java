@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -20,6 +19,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.kingsman.hp.service.DataCheckingService;
+import com.kingsman.hp.utils.SharePreferenceSettings;
 
 /**
  * A fragment representing a list of Items.
@@ -29,11 +29,12 @@ import com.kingsman.hp.service.DataCheckingService;
  */
 public class ProviderFragment extends Fragment implements AdapterView.OnItemSelectedListener, View.OnClickListener {
     private static final String SHARED_PREFERENCE_NAME = "preference";
-    private final String SP_SpinnerIndex_term = "index_term";
-    private final String SP_SpinnerIndex_data = "index_data";
-    private final String SP_AOMUNT_offeredData = "offer_data";
+    public static final String SP_SpinnerIndex_term = "index_term";
+    public static final String SP_SpinnerIndex_data = "index_data";
+    public static final String SP_AOMUNT_offeredData = "offer_data";
     //private final String SP_AOMUNT_remainData = "remain_data";
-    private final String SP_AOMUNT_offeredTotalData = "total_data";
+    public static final String SP_AOMUNT_offeredTotalData = "total_data";
+    public static final String SP_AOMUNT_limitData = "limit_data";
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -54,7 +55,8 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     private Button btn_Start;
     private Button btn_Stop;
 
-    private SharedPreferences mPref;
+    //private SharedPreferences mPref;
+    private SharePreferenceSettings mPref;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -80,7 +82,25 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+    }
+
+    @Override
+    public void onResume() {
         startServiceMethod();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        try {
+            if (mConnection != null)
+                getActivity().unbindService(mConnection);
+        }
+        catch (IllegalArgumentException e){ // Service not registered
+            e.printStackTrace();
+        }
+
+        super.onPause();
     }
 
     @Override
@@ -112,11 +132,12 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         btn_Start.setOnClickListener(this);
         btn_Stop = (Button)view.findViewById(R.id.provider_stop);
         btn_Stop.setOnClickListener(this);
+
         updateUI();
     }
 
     private void getInfoData(){
-        mPref = getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        mPref = SharePreferenceSettings.getInstance();//getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
         mSpinnerIndex_term = mPref.getInt(SP_SpinnerIndex_term, 0);
         Log.d("aa", "mSpinnerIndex_term : " + mSpinnerIndex_term);
         if(mSpinnerIndex_term >= getResources().getStringArray(R.array.select_date).length){
@@ -204,13 +225,19 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         else
             remainDataAmount = mLimitAmount - offeredDataAmount;
 
-        mPref = getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mPref.edit();
-        editor.putLong(SP_AOMUNT_offeredData, offeredDataAmount);
-        editor.putLong(SP_AOMUNT_offeredTotalData, offeredTotalDataAmount);
-        editor.putInt(SP_SpinnerIndex_term, mSpinnerIndex_term);
-        editor.putInt(SP_SpinnerIndex_data, mSpinnerIndex_data);
-        editor.commit();
+        mPref = SharePreferenceSettings.getInstance();
+        mPref.put(SP_AOMUNT_offeredData, offeredDataAmount);
+        mPref.put(SP_AOMUNT_offeredTotalData, offeredTotalDataAmount);
+        mPref.put(SP_SpinnerIndex_term, mSpinnerIndex_term);
+        mPref.put(SP_SpinnerIndex_data, mSpinnerIndex_data);
+        mPref.put(SP_AOMUNT_limitData, mCallback.getLimitValue() * 1024L * 1024L);
+//        mPref = getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = mPref.edit();
+//        editor.putLong(SP_AOMUNT_offeredData, offeredDataAmount);
+//        editor.putLong(SP_AOMUNT_offeredTotalData, offeredTotalDataAmount);
+//        editor.putInt(SP_SpinnerIndex_term, mSpinnerIndex_term);
+//        editor.putInt(SP_SpinnerIndex_data, mSpinnerIndex_data);
+//        editor.commit();
     }
 
     private void updateUI(){
@@ -302,7 +329,7 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
 
     };
 
-    private void startServiceMethod(){
+    private void startServiceMethod() {
         Intent service = new Intent(getActivity(), DataCheckingService.class);
         getActivity().bindService(service, mConnection, Context.BIND_AUTO_CREATE);
     }

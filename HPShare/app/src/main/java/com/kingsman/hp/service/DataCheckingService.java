@@ -13,6 +13,9 @@ import android.os.Message;
 import android.text.format.Formatter;
 import android.util.Log;
 
+import com.kingsman.hp.ProviderFragment;
+import com.kingsman.hp.utils.SharePreferenceSettings;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,16 +44,17 @@ public class DataCheckingService extends Service {
         return mBinder;
     }
 
-    private final int BYTES = 1024;
+    private final long BYTES = 1024L;
     private final int HANDLER_MESSAGE_CHECKING = 1;
     private final IBinder mBinder = new DataServiceBinder();
 
     private ICallback mCallback;
     private HashMap<String, Long> mAppDataUsages;
     private Handler mHandler;
+    private SharePreferenceSettings mPref;
 
     private int mTermType = 0;
-    private long mLimitMB_Value = 100;
+    private long mLimit_Value = 0L;
     private long mStartUsageValue = 0L;
 
     private long mTestAppDataUsageValue = 0L;
@@ -71,8 +75,8 @@ public class DataCheckingService extends Service {
     public void setTermType(int value){
         mTermType = value;
     }
-    public void setLimitValue(int value){
-        mLimitMB_Value = value;
+    public void setLimitValue(long value){
+        mLimit_Value = value;
     }
     public void stopChcecking(){
         isRunning = false;
@@ -151,10 +155,11 @@ public class DataCheckingService extends Service {
                 if(msg.what == HANDLER_MESSAGE_CHECKING){
                     mCurValue = testDataUsageChecking();
                     mCurTotalValue += mCurValue;
-                    mCallback.updateCurUsage(mCurValue);
+                    //mCallback.updateCurUsage(mCurValue); change to send broadcast or do it on activity.
 
-                    if(mLimitMB_Value == mDefault_limit_value){
-                        mLimitMB_Value = mCallback.getLimitValue() * BYTES * BYTES;
+                    if(mLimit_Value == mDefault_limit_value){
+                        //mLimitMB_Value = mCallback.getLimitValue() * BYTES * BYTES;
+                        mLimit_Value = mPref.getLong(ProviderFragment.SP_AOMUNT_limitData, mDefault_limit_value);
                     }
                 }
                 super.handleMessage(msg);
@@ -165,6 +170,7 @@ public class DataCheckingService extends Service {
     }
 
     private void initInfo(){
+        mPref = SharePreferenceSettings.getInstance();
         mTestAppDataUsageValue = 0L;
         mTestHotSpotDataUsageValue = 0L;
         mOldUsageValue = -1L;
@@ -172,9 +178,12 @@ public class DataCheckingService extends Service {
 
         // need to change - get info from server
         mCurValue = 0;
-        mCurTotalValue = mCallback.getOldOfferedValue();
-        mLimitMB_Value = mCallback.getLimitValue() * BYTES * BYTES;
+        //mCurTotalValue = mCallback.getOldOfferedValue();
+        mCurTotalValue = mPref.getLong(ProviderFragment.SP_AOMUNT_offeredData, 0L);
+
+        //mLimitMB_Value = mCallback.getLimitValue() * BYTES * BYTES;
         //mLimitMB_Value = mDefault_limit_value;
+        mLimit_Value = mPref.getLong(ProviderFragment.SP_AOMUNT_limitData, mDefault_limit_value);
     }
 
     private void startService(){
@@ -199,7 +208,7 @@ public class DataCheckingService extends Service {
             @Override
             public void run() {
                 Log.d("aaa", "Running start");
-                while (isRunning && mCurTotalValue < mLimitMB_Value){//mDefault_limit_value){
+                while (isRunning && mCurTotalValue < mLimit_Value){//mDefault_limit_value){
                     Message msg = new Message();
                     msg.what = HANDLER_MESSAGE_CHECKING;
                     mHandler.sendMessage(msg);
