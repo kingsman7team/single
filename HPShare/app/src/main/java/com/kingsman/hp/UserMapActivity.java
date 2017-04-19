@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -98,12 +99,11 @@ public class UserMapActivity extends FragmentActivity implements OnMapReadyCallb
         mUiSettings.setZoomControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);
         mUiSettings.setMyLocationButtonEnabled(true);
-
+        mMap.setMyLocationEnabled(true);
         mUiSettings.setScrollGesturesEnabled(true);
         mUiSettings.setZoomGesturesEnabled(true);
         mUiSettings.setTiltGesturesEnabled(true);
         mUiSettings.setRotateGesturesEnabled(true);
-
 
         checkPermission();
     }
@@ -113,9 +113,7 @@ public class UserMapActivity extends FragmentActivity implements OnMapReadyCallb
      * be shown to the user, displays a dialog that triggers the request.
      */
     private void checkPermission() {
-
         requestFineLocationPermission(LOCATION_LAYER_PERMISSION_REQUEST_CODE);
-
     }
 
     /**
@@ -154,7 +152,7 @@ public class UserMapActivity extends FragmentActivity implements OnMapReadyCallb
     protected void onResumeFragments() {
         super.onResumeFragments();
         if (mLocationPermissionDenied) {
-
+            PermissionUtils.PermissionDeniedDialog.newInstance(false).show(getSupportFragmentManager(), "dialog");
             mLocationPermissionDenied = false;
         }
     }
