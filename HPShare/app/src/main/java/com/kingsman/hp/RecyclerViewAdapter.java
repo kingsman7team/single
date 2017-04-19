@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.kingsman.hp.ap.AccessPoint;
 
 import java.util.ArrayList;
