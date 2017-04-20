@@ -44,6 +44,8 @@ public class DataCheckingService extends Service {
         return mBinder;
     }
 
+    public static final String INTENT_HPSHARE_DATA_USAGE = "com.kingsman.hp.service.DATA_USAGE";
+
     private final long BYTES = 1024L;
     private final int HANDLER_MESSAGE_CHECKING = 1;
     private final IBinder mBinder = new DataServiceBinder();
@@ -65,6 +67,7 @@ public class DataCheckingService extends Service {
     private long mDefault_limit_value = 5000000L;
     private long mCurValue;
     private long mCurTotalValue;
+    private long mTotalOfferedValue;
 
     private boolean isRunning = false;
 
@@ -77,6 +80,12 @@ public class DataCheckingService extends Service {
     }
     public void setLimitValue(long value){
         mLimit_Value = value;
+    }
+    public long getCurTotalValue(){
+        return mCurTotalValue;
+    }
+    public long getTotalOfferedValue(){
+        return mTotalOfferedValue;
     }
     public void stopChcecking(){
         isRunning = false;
@@ -154,8 +163,12 @@ public class DataCheckingService extends Service {
 //                }
                 if(msg.what == HANDLER_MESSAGE_CHECKING){
                     mCurValue = testDataUsageChecking();
+                    if(mCurValue <= 0L)
+                        return;
                     mCurTotalValue += mCurValue;
+                    mTotalOfferedValue += mCurValue;
                     //mCallback.updateCurUsage(mCurValue); change to send broadcast or do it on activity.
+                    sendBroadcast(new Intent(INTENT_HPSHARE_DATA_USAGE));
 
                     if(mLimit_Value == mDefault_limit_value){
                         //mLimitMB_Value = mCallback.getLimitValue() * BYTES * BYTES;
@@ -165,6 +178,7 @@ public class DataCheckingService extends Service {
                 super.handleMessage(msg);
             }
         };
+        initInfo();
         //Log.d("aaa", "DataService onCreate");
         super.onCreate();
     }
@@ -180,14 +194,17 @@ public class DataCheckingService extends Service {
         mCurValue = 0;
         //mCurTotalValue = mCallback.getOldOfferedValue();
         mCurTotalValue = mPref.getLong(ProviderFragment.SP_AOMUNT_offeredData, 0L);
+        mTotalOfferedValue = mPref.getLong(ProviderFragment.SP_AOMUNT_offeredTotalData, 0L);
+        Log.d("service", "mCurTotalValue : " + mCurTotalValue);
+        Log.d("service", "mTotalOfferedValue : " + mTotalOfferedValue);
 
         //mLimitMB_Value = mCallback.getLimitValue() * BYTES * BYTES;
         //mLimitMB_Value = mDefault_limit_value;
         mLimit_Value = mPref.getLong(ProviderFragment.SP_AOMUNT_limitData, mDefault_limit_value);
+        Log.d("service", "mLimit_Value : " + mLimit_Value);
     }
 
     private void startService(){
-        initInfo();
         isRunning = true;
         checkingDataUsage();
     }
@@ -225,11 +242,22 @@ public class DataCheckingService extends Service {
     }
 
     private void saveInfo(){
+        Log.d("aa", "saveInfo +");
+
+        Log.d("aa", "mCurTotalValue : " + mCurTotalValue + ", mTotalOfferedValue : " + mTotalOfferedValue + ", mLimit_Value : " + mLimit_Value);
         // if something to need to be saved..
+        if(mPref == null)
+            mPref = SharePreferenceSettings.getInstance();
+        mPref.put(ProviderFragment.SP_AOMUNT_offeredData, mCurTotalValue);
+        mPref.put(ProviderFragment.SP_AOMUNT_offeredTotalData, mTotalOfferedValue);
+        mPref.put(ProviderFragment.SP_AOMUNT_limitData, mLimit_Value);
+
+        Log.d("aa", "saveInfo -");
     }
 
     @Override
     public void onDestroy() {
+        saveInfo();
         super.onDestroy();
     }
 }

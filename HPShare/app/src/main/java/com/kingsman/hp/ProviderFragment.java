@@ -1,8 +1,10 @@
 package com.kingsman.hp;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -87,11 +89,21 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     @Override
     public void onResume() {
         startServiceMethod();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DataCheckingService.INTENT_HPSHARE_DATA_USAGE);
+        getActivity().registerReceiver(mReceiver, filter);
+
+        updateDataUsageInfo();
+        updateUI();
+
         super.onResume();
     }
 
     @Override
     public void onPause() {
+        getActivity().unregisterReceiver(mReceiver);
+
         try {
             if (mConnection != null)
                 getActivity().unbindService(mConnection);
@@ -133,7 +145,7 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         btn_Stop = (Button)view.findViewById(R.id.provider_stop);
         btn_Stop.setOnClickListener(this);
 
-        updateUI();
+        //updateUI();
     }
 
     private void getInfoData(){
@@ -152,8 +164,10 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
 
         // need to change to get info from server
         offeredDataAmount = mPref.getLong(SP_AOMUNT_offeredData, 0L);
+        Log.d("aa", "offeredDataAmount : " + offeredDataAmount);
         //remainDataAmount = mPref.getInt(SP_AOMUNT_remainData, 0);
         offeredTotalDataAmount = mPref.getLong(SP_AOMUNT_offeredTotalData, 0L);
+        Log.d("aa", "offeredTotalDataAmount : " + offeredTotalDataAmount);
 
         if(mLimitAmount <= offeredDataAmount){
             remainDataAmount = 0L;
@@ -183,9 +197,15 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         Log.d("aa", "SPINNER_RID_DATA id : " + SPINNER_RID_DATA);*/
         if(parent.getId() == SPINNER_RID_TERM){
             mSpinnerIndex_term = position;
+            if(mService != null){
+                mService.setTermType(mSpinnerIndex_term);
+            }
         }
         else if(parent.getId() == SPINNER_RID_DATA){
             mSpinnerIndex_data = position;
+            if(mService != null){
+                mService.setLimitValue(getLimitAmount());
+            }
         }
         else {
             return;
@@ -193,6 +213,7 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         // send info to server
         // update screen info
         updateDataUsageInfo();
+        savePreferenceInfo();
         updateUI();
     }
 
@@ -216,28 +237,27 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         return limitAmount;
     }
 
-    private void updateDataUsageInfo(){
+    private void updateDataUsageInfo() {
+        if(mService != null) {
+            offeredDataAmount = mService.getCurTotalValue();
+            offeredTotalDataAmount = mService.getTotalOfferedValue();
+        }
+
         mLimitAmount = getLimitAmount();
-        if(mLimitAmount <= offeredDataAmount){
+        if (mLimitAmount <= offeredDataAmount) {
             remainDataAmount = 0L;
             //stopOfferData();
-        }
-        else
+        } else
             remainDataAmount = mLimitAmount - offeredDataAmount;
+    }
 
+    private void savePreferenceInfo(){
         mPref = SharePreferenceSettings.getInstance();
-        mPref.put(SP_AOMUNT_offeredData, offeredDataAmount);
-        mPref.put(SP_AOMUNT_offeredTotalData, offeredTotalDataAmount);
+        //mPref.put(SP_AOMUNT_offeredData, offeredDataAmount);
+        //mPref.put(SP_AOMUNT_offeredTotalData, offeredTotalDataAmount);
         mPref.put(SP_SpinnerIndex_term, mSpinnerIndex_term);
         mPref.put(SP_SpinnerIndex_data, mSpinnerIndex_data);
         mPref.put(SP_AOMUNT_limitData, mCallback.getLimitValue() * 1024L * 1024L);
-//        mPref = getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = mPref.edit();
-//        editor.putLong(SP_AOMUNT_offeredData, offeredDataAmount);
-//        editor.putLong(SP_AOMUNT_offeredTotalData, offeredTotalDataAmount);
-//        editor.putInt(SP_SpinnerIndex_term, mSpinnerIndex_term);
-//        editor.putInt(SP_SpinnerIndex_data, mSpinnerIndex_data);
-//        editor.commit();
     }
 
     private void updateUI(){
@@ -333,4 +353,14 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         Intent service = new Intent(getActivity(), DataCheckingService.class);
         getActivity().bindService(service, mConnection, Context.BIND_AUTO_CREATE);
     }
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equalsIgnoreCase(DataCheckingService.INTENT_HPSHARE_DATA_USAGE)){
+                updateDataUsageInfo();
+                updateUI();
+            }
+        }
+    };
 }
