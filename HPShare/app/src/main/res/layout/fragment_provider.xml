@@ -9,6 +9,11 @@ tools:context="com.kingsman.hp.ProviderFragment">
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+        <Button
+            android:id="@+id/ap_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sign_out"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,7 +26,8 @@ tools:context="com.kingsman.hp.ProviderFragment">
             android:id="@+id/ap_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/provider_ap_settings"/>
+            android:text="@string/provider_ap_settings"
+            android:visibility="gone"/>
         <Button
             android:id="@+id/provider_start"
             android:layout_width="wrap_content"

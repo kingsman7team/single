@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.Formatter;
@@ -20,6 +21,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.firebase.auth.FirebaseAuth;
 import com.kingsman.hp.service.DataCheckingService;
 import com.kingsman.hp.utils.SharePreferenceSettings;
 
@@ -54,8 +60,12 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
     private TextView remainData;
     private TextView offeredTotalData;
     private Button btn_ApSetting;
+    private Button btn_Logout;
     private Button btn_Start;
     private Button btn_Stop;
+
+//    private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInHelper mGoogleSignInHelper;
 
     //private SharedPreferences mPref;
     private SharePreferenceSettings mPref;
@@ -84,6 +94,14 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+
+        mGoogleSignInHelper = GoogleSignInHelper.getInstance();
+        //mGoogleApiClient = mGoogleSignInHelper.getGoogleApiClient();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -140,6 +158,8 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
         remainData = (TextView)view.findViewById(R.id.provider_remain_data_amount);
         offeredTotalData = (TextView)view.findViewById(R.id.provider_total_offered_amount);
 
+        btn_Logout = (Button)view.findViewById(R.id.ap_logout);
+        btn_Logout.setOnClickListener(this);
         btn_Start = (Button)view.findViewById(R.id.provider_start);
         btn_Start.setOnClickListener(this);
         btn_Stop = (Button)view.findViewById(R.id.provider_stop);
@@ -285,7 +305,56 @@ public class ProviderFragment extends Fragment implements AdapterView.OnItemSele
             Intent intent = new Intent(getActivity(), DataCheckingService.class);
             getActivity().stopService(intent);
         }
+        else if(v.getId() == R.id.ap_logout){
+            // google logout
+            signOut();
+        }
     }
+
+    public void signOut() {
+        mGoogleSignInHelper.getGoogleApiClient().connect();
+        mGoogleSignInHelper.getGoogleApiClient().registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(@Nullable Bundle bundle) {
+
+                FirebaseAuth.getInstance().signOut();
+                if(mGoogleSignInHelper.getGoogleApiClient().isConnected()) {
+                    Auth.GoogleSignInApi.signOut(mGoogleSignInHelper.getGoogleApiClient()).setResultCallback(new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(@NonNull Status status) {
+                            if (status.isSuccess()) {
+                                Log.d("", "User Logged out");
+                                startActivity(new Intent("com.kingsman.hp.GoogleSignInActivity"));
+                                getActivity().finish();
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onConnectionSuspended(int i) {
+                Log.d("", "Google API Client Connection Suspended");
+            }
+        });
+    }
+//    private void signOut() {
+//        Log.d("z","signOut");
+//        if ( mGoogleSignInHelper.getGoogleApiClient().isConnected() ) {
+//            Auth.GoogleSignInApi.signOut(mGoogleSignInHelper.getGoogleApiClient()).setResultCallback(
+//                    new ResultCallback<Status>() {
+//                        @Override
+//                        public void onResult(Status status) {
+//                            // ...
+//                            //                        Toast.makeText(getActivity().getApplicationContext(),"Logged Out",Toast.LENGTH_SHORT).show();
+//                            //                        Intent intent = new Intent("com.kingsman.hp.GoogleSignInActivity");
+//                            //                        startActivity(intent);
+//                            startActivity(new Intent("com.kingsman.hp.GoogleSignInActivity"));
+//                            getActivity().finish();
+//                        }
+//                    });
+//        }
+//    }
 
     /**
      * This interface must be implemented by activities that contain this

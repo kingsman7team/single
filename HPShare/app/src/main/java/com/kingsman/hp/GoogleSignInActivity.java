@@ -1,10 +1,12 @@
 package com.kingsman.hp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -40,7 +42,8 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     private FirebaseAuth mAuth;
     // [END declare_auth]
 
-    private GoogleApiClient mGoogleApiClient;
+    //private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInHelper mGoogleSignInHelper;
     private TextView mStatusTextView;
     private TextView mDetailTextView;
 
@@ -66,10 +69,12 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                 .build();
         // [END config_signin]
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        mGoogleSignInHelper = GoogleSignInHelper.getInstance();
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+        mGoogleSignInHelper.setGoogleApiClient(mGoogleApiClient);
 
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
@@ -99,8 +104,21 @@ public class GoogleSignInActivity extends AppCompatActivity implements
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
 
-                Intent intent = new Intent("com.kingsman.hp.HPShareActivity");
-                startActivity(intent);
+                // Device id, phone Num, language, country는 flash activity에서 획득.
+                TelephonyManager mgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                mgr.getDeviceId();
+                mgr.getLine1Number();
+                getResources().getConfiguration().locale.getLanguage();
+                getResources().getConfiguration().locale.getCountry();
+                Log.d("onActivityResult", "getDeviceId : " + mgr.getDeviceId());
+                Log.d("onActivityResult", "getLine1Number : " + mgr.getLine1Number());
+                Log.d("onActivityResult", "getLanguage : " + getResources().getConfiguration().locale.getLanguage());
+                Log.d("onActivityResult", "getCountry : " + getResources().getConfiguration().locale.getCountry());
+
+
+                // google info
+                Log.d("onActivityResult", "getDisplayName : " + account.getDisplayName());
+                Log.d("onActivityResult", "getEmail : " + account.getEmail());
             } else {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
@@ -146,7 +164,7 @@ public class GoogleSignInActivity extends AppCompatActivity implements
 
     // [START signin]
     private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleSignInHelper.getGoogleApiClient());//mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
     // [END signin]
@@ -156,7 +174,8 @@ public class GoogleSignInActivity extends AppCompatActivity implements
         mAuth.signOut();
 
         // Google sign out
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+        Auth.GoogleSignInApi.signOut(mGoogleSignInHelper.getGoogleApiClient()//mGoogleApiClient
+        ).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
@@ -170,7 +189,8 @@ public class GoogleSignInActivity extends AppCompatActivity implements
         mAuth.signOut();
 
         // Google revoke access
-        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+        Auth.GoogleSignInApi.revokeAccess(mGoogleSignInHelper.getGoogleApiClient()//mGoogleApiClient
+        ).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
@@ -182,11 +202,15 @@ public class GoogleSignInActivity extends AppCompatActivity implements
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+//            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
+//            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+//
+//            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+//            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
 
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+            Intent intent = new Intent("com.kingsman.hp.HPShareActivity");
+            startActivity(intent);
+            finish();
         } else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);
