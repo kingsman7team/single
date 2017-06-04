@@ -97,6 +97,11 @@ public class HPShareActivity extends AppCompatActivity implements ConsumerFragme
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+//        if(!GoogleApiAvailability.isGooglePlayServicesAvailable(this)) {
+//            GoogleApiAvailability.makeGooglePlayServicesAvailable();
+//        }
+
     }
 
     @Override

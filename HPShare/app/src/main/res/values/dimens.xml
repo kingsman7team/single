@@ -13,4 +13,9 @@
     <dimen name="access_point_margin_end">16dip</dimen>
     <dimen name="access_point_item_image_size">16dip</dimen>
 
+    <!-- https://github.com/firebase/quickstart-android -->
+    <dimen name="icon_top_margin">24dp</dimen>
+    <dimen name="icon_bottom_margin">24dp</dimen>
+    <dimen name="title_bottom_margin">16dp</dimen>
+    <dimen name="field_width_standard">160dp</dimen>
 </resources>

@@ -7,4 +7,12 @@
     <color name="wifi_color_dark">#89ffffff</color>
     <color name="wifi_color_light">#89000000</color>
 
+    <!-- https://github.com/firebase/quickstart-android -->
+    <!--<color name="colorPrimary">#039BE5</color>-->
+    <!--<color name="colorPrimaryDark">#0288D1</color>-->
+    <!--<color name="colorAccent">#FFA000</color>-->
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_300">#E0E0E0</color>
+
+
 </resources>
